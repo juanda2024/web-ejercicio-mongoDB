@@ -1,7 +1,7 @@
 const WebSocket = require("ws");
 var express = require('express');
 var router = express.Router();
-const Mensaje = require("./models/mensajes");
+var [getMensajes] = require('./controllers/messages');
 
 const clients = [];
 const messages = [];
@@ -20,17 +20,17 @@ const wsConnection = (server) => {
         });
     });
 
-    const sendMessages = () => {
-        /* GET mensajes */
+    async function sendMessages(){
+        await mixMessages();
         clients.forEach((client) => client.send(JSON.stringify(messages)));
     };
 
-    const mixMessages = () => {
-        Mensaje.findAll().then((result) => {
+    async function mixMessages() {
+        getMensajes().then((result) => {
             if (result != null || result[0] != null) {
                 for (i in result) {
-                    if (messages.find(element => element == result[i]["dataValues"]["message"]) == null) {
-                        messages.push(result[i]["dataValues"]["message"]);
+                    if (messages.find(element => element == result[i]["message"]) == null) {
+                        messages.push(result[i]["message"]);
                     }
                 }
             }
