@@ -1,26 +1,38 @@
+const mdbconn = require('../lib/utils/mongo.js');
+database = "chat";
+collection = "mensajes";
 
-const { MongoUtils, database } = require('../lib/utils/mongo.js');
-const COLLECTION_NAME = "mensajes";
-
-async function getMensajes() {
-    const mensaje = await MongoUtils.conn();
-    const mensajes_obtenidos = await mensaje
-        .db(database)
-        .collection(COLLECTION_NAME)
-        .find({})
-        .toArray()
-        .finally(() => mensaje.close());
-    return mensajes_obtenidos;
-}
-
-function insertMensaje(mensaje_nuevo) {
-    return MongoUtils.conn().then((mensaje) => {
-        return mensaje
-            .db(database)
-            .collection(COLLECTION_NAME)
-            .insertOne(mensaje_nuevo)
-            .finally(() => mensaje.close());
+function getMensajes() {
+    return mdbconn.conn().then((client) => {
+        return client.db(database).collection(collection).find({}).toArray();
     });
 }
 
-module.exports = [getProducts, insertProduct];
+function getMensaje(ts_buscado) {
+    return mdbconn.conn().then((client) => {
+        return client.db(database).collection(collection).aggregate([{ $match: { ts: ts_buscado } }]).toArray();
+    });
+}
+
+function insertMensaje(mensaje_nuevo) {
+    return mdbconn.conn().then((client) => {
+        return client.db(database).collection(collection).insertOne(mensaje_nuevo).finally();
+    });
+}
+
+function changeMensaje(ts_objetivo, mensaje_modificado) {
+    return mdbconn.conn().then((client) => {
+        return client.db(database).collection(collection).updateOne(
+            { ts: ts_objetivo }, // Filtro al documento que queremos modificar
+            { $set: { message: mensaje_modificado.message } } // El cambio que se quiere realizar
+        )
+    });
+}
+
+function deleteMensaje(ts_objetivo) {
+    return mdbconn.conn().then((client) => {
+        return client.db(database).collection(collection).deleteOne({ ts: ts_objetivo })
+    });
+}
+
+module.exports = [getMensajes, getMensaje, insertMensaje, changeMensaje, deleteMensaje];

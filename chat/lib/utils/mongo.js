@@ -1,20 +1,19 @@
+const uri = "mongodb+srv://admin:OHrvYqzO8qwFcsXb@cluster0.i8eqf.mongodb.net/chat?retryWrites=true&w=majority";
 const MongoClient = require('mongodb').MongoClient;
-const uri = 'mongodb://localhost:27017/';
-const database = "messages";
 
 function MongoUtils() {
+
     const mu = {};
 
+    // Esta función retorna una nueva conexión a MongoDB.
+    // Tenga presente que es una promesa que deberá ser resuelta.
     mu.conn = () => {
-        const mensaje = new MongoClient(uri, {
+        const client = new MongoClient(uri, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-
         });
-        return mensaje.connect();
+        return client.connect();
     };
     return mu;
 }
-
-exports.MongoUtils = MongoUtils();
-exports.database = database;
+module.exports = MongoUtils();
